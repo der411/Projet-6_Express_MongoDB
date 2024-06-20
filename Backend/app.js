@@ -1,10 +1,12 @@
 // Importation des modules nécessaires
 const express = require('express');
+const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+// Importation des routes
+const bookRoutes = require('./routes/BookRoutes');
+const userRoutes = require('./routes/UserRoutes');
 
-// Création du modèle Book
-const Book = require('./models/Book');
-
+// Création de l'application Express
 const app = express();
 
 // Connexion à la base de données MongoDB
@@ -25,44 +27,12 @@ app.use((req, res, next) => {
    next();
  });
 
- // Route pour créer un nouveau Book
-app.post('/api/books', (req, res, next) => {
-    delete req.body._id;
-    const book = new Book({
-      ...req.body
-    });
-    book.save()
-      .then(() => res.status(201).json({ message: 'Livre enregistré !'}))
-      .catch(error => res.status(400).json({ error }));
-});
+// Middleware pour analyser les corps de requête JSON
+ app.use(bodyParser.json());
 
-// Route pour modifier un Book existant
-app.put('/api/books/:id', (req, res, next) => {
-  Book.updateOne({ _id: req.params.id }, { ...req.body, _id: req.params.id })
-    .then(() => res.status(200).json({ message: 'Livre modifié !'}))
-    .catch(error => res.status(400).json({ error }));
-});
+// Middleware pour gérer les routes
+ app.use('/api/books', bookRoutes);
+ app.use('/api/auth', userRoutes);
 
-// Route pour supprimer un Book
-app.delete('/api/books/:id', (req, res, next) => {
-  Book.deleteOne({ _id: req.params.id })
-    .then(() => res.status(200).json({ message: 'Livre supprimé !'}))
-    .catch(error => res.status(400).json({ error }));
-});
-
-// Route pour récupérer un Book par son id
-app.get('/api/books/:id', (req, res, next) => {;
-  Book.findOne({ _id: req.params.id })
-    .then(book => res.status(200).json(book))
-    .catch(error => res.status(404).json({ error }));
-});
-
-// Route pour récupérer tous les Books
-app.get('/api/books', (req, res, next) => {
-  Book.find()
-    .then(books => res.status(200).json(books))
-    .catch(error => res.status(400).json({ error }));
-});
-
-
+// Exportation de l'application Express
 module.exports = app;
