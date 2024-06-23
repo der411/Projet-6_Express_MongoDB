@@ -1,25 +1,20 @@
-// Importation de Mongoose
-const mongoose = require('mongoose');   
+const mongoose = require('mongoose');
 
-// Création du schéma de données
+// Création du schéma de données pour les livres
 const bookSchema = mongoose.Schema({
     title: { type: String, required: true },
     author: { type: String, required: true },
-    year: { type: Date, required: true},
-    pageCount: { type: Number },
+    year: { type: Number, required: true },
     genre: { type: String, required: true },
-    description: { type: String },
-    ISBN: { type: String },
-    language: { type: String },
     imageUrl: { type: String },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // ID de l'utilisateur
     ratings: [
-        { 
-            userId: { type: String }, // Id du User qui a donné la note
-            grade: { type: Number } // Note attribuée par le User
+        {
+            userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // ObjectId pour la référence
+            grade: { type: Number } // Note attribuée par l'utilisateur
         }
     ],
-    averageRating: { type: Number }, // Note moyenne du livre
+    averageRating: { type: Number } // Note moyenne du livre
 });
 
-// Exportation du modèle de données
 module.exports = mongoose.model('Book', bookSchema);

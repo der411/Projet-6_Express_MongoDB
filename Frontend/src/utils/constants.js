@@ -4,6 +4,8 @@ export const API_ROUTES = {
   SIGN_IN: `${API_URL}/api/auth/login`,
   BOOKS: `${API_URL}/api/books`,
   BEST_RATED: `${API_URL}/api/books/bestrating`,
+  UPDATE_BOOK: `${API_URL}/api/books/:id`,
+  DELETE_BOOK: `${API_URL}/api/books/:id`,
 };
 
 export const APP_ROUTES = {
