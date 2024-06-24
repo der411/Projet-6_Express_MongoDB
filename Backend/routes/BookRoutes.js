@@ -23,4 +23,7 @@ router.get('/:id', bookController.getOneBook);
 // Route pour récupérer tous les Books
 router.get('/', bookController.getAllBooks);
 
+// Route pour noter un Book
+router.post('/:id/rating', auth, bookController.rateBook);
+
 module.exports = router;

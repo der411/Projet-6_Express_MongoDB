@@ -2,7 +2,7 @@ const Book = require('../models/Book');
 const fs = require('fs');
 
 
-// Créer un livre
+// Fonction pour créer un livre
 exports.createBook = (req, res, next) => {
   console.log('Request body:', req.body);
   console.log('Request file:', req.file);
@@ -28,7 +28,7 @@ exports.createBook = (req, res, next) => {
   }
 };
 
-// Modifier un livre
+// Fonction pour modifier un livre
 exports.modifyBook = (req, res, next) => {
   const bookObject = req.file ? {
       ...JSON.parse(req.body.book),
@@ -50,7 +50,7 @@ exports.modifyBook = (req, res, next) => {
       });
 };
 
-// Supprimer un livre
+// Fonction pour supprimer un livre
 exports.deleteBook = (req, res, next) => {
   Book.findOne({ _id: req.params.id})
       .then(book => {
@@ -70,7 +70,7 @@ exports.deleteBook = (req, res, next) => {
       });
 };
 
-// Récupérer un livre
+// Fonction pour récupérer un livre
 exports.getOneBook = (req, res, next) => {
     Book.findOne({ _id: req.params.id })
       .then(book => {
@@ -82,7 +82,7 @@ exports.getOneBook = (req, res, next) => {
       .catch(error => res.status(500).json({ error: 'Erreur serveur' }));
 };
 
-// Récupérer tous les livres
+// Fonction pour récupérer tous les livres
 exports.getAllBooks = (req, res, next) => {
     Book.find()
       .then(books => res.status(200).json(books))
@@ -90,9 +90,58 @@ exports.getAllBooks = (req, res, next) => {
       );
 };
 
-// Récupérer les meilleurs livres
+// Fonction pour récupérer les meilleurs livres
 exports.getBestRatedBooks = (req, res, next) => {
   Book.find().sort({ averageRating: -1 }).limit(5)
     .then(books => res.status(200).json(books))
     .catch(error => res.status(400).json({ error }));
 };
+
+// Fonction pour gérer la notation d'un livre
+exports.rateBook = (req, res) => {
+  // Récupérer le bookId depuis les paramètres de l'URL
+  const bookId = req.params.id;
+  
+  // Récupérer la note depuis le corps de la requête
+  const { rating } = req.body; 
+
+  // Log pour vérifier les données de la requête
+  console.log('Requête reçue pour noter le livre:', bookId, 'avec la note:', rating);
+
+  // Rechercher le livre par son ID dans la base de données
+  Book.findById(bookId)
+    .then(book => {
+      // Si le livre n'est pas trouvé, renvoyer une erreur 404
+      if (!book) {
+        return res.status(404).json({ message: 'Livre non trouvé' });
+      }
+
+      // Vérifier si l'utilisateur a déjà noté ce livre
+      const existingRating = book.ratings.find(r => r.userId.equals(req.auth.userId));
+      if (existingRating) {
+        // Si une note existe déjà, renvoyer une erreur 400
+        return res.status(400).json({ message: 'Vous avez déjà noté ce livre' });
+      }
+
+      // Ajouter la nouvelle note au tableau des notes du livre
+      book.ratings.push({ userId: req.auth.userId, grade: rating });
+
+      // Calculer la nouvelle note moyenne du livre
+      book.averageRating = book.ratings.reduce((acc, r) => acc + r.grade, 0) / book.ratings.length;
+
+      // Sauvegarder les modifications dans la base de données
+      book.save()
+        .then(updatedBook => {
+          // Log pour vérifier les données renvoyées
+          console.log('Livre mis à jour:', updatedBook);
+
+          // Renvoie le livre mis à jour
+          res.status(201).json(updatedBook);
+        })
+        // En cas d'erreur lors de la sauvegarde, renvoyer une erreur 500
+        .catch(error => res.status(500).json({ error }));
+    })
+    // En cas d'erreur lors de la recherche du livre, renvoyer une erreur 500
+    .catch(error => res.status(500).json({ error }));
+};
+
