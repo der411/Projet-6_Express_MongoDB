@@ -29,7 +29,7 @@ const storage = multer.diskStorage({
 // Middleware de multer pour gérer le téléchargement d'un seul fichier image
 const upload = multer({ storage }).single('image');
 
-// Middleware pour optimiser l'image téléchargée en utilisant sharp
+// Middleware pour optimiser l'image téléchargée avec sharp
 const optimizeImage = async (req, res, next) => {
     if (!req.file) {
         // Si aucun fichier n'est téléchargé, passe au middleware suivant
@@ -44,33 +44,27 @@ const optimizeImage = async (req, res, next) => {
     const filenameWithoutExtension = path.basename(filename, path.extname(filename));
     const webpFilePath = path.join('images', `${filenameWithoutExtension}-${Date.now()}.webp`);
 
-    console.log(`Optimizing image: ${filePath}`);
-    console.log(`Saving optimized image to: ${webpFilePath}`);
-
     try {
         // Assurer que le fichier original est accessible
         await fs.access(filePath);
 
         // Redimensionner l'image et la convertir en format WebP avec sharp
         const data = await sharp(filePath)
-            .resize(300, 300, { fit: 'inside' })  // Redimensionne avec une contrainte de taille
+            .resize(300, 300, { fit: 'inside' })  // Redimensionne l'image pour s'adapter à une boîte de 300x300 pixels
             .webp()  // Convertit en WebP
-            .toBuffer();
+            .toBuffer(); // Récupère les données binaires de l'image
         
         // Écrire le nouveau fichier WebP sur le disque
         await fs.writeFile(webpFilePath, data);
-
-        console.log(`Image optimized: ${webpFilePath}`);
 
         // Mettre à jour le chemin du fichier dans l'objet req.file pour refléter le nouveau fichier WebP
         req.file.filename = path.basename(webpFilePath);
 
         // Passer au middleware suivant
         next();
+
     } catch (error) {
-        // En cas d'erreur, loguer l'erreur et envoyer une réponse avec erreur
-        console.error('Error optimizing image:', error);
-        res.status(500).json({ error: 'Error processing image' });
+        res.status(500).json({ error:'Erreur lors du traitement de l/image' });
     }
 };
 

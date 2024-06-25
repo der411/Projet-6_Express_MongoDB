@@ -21,7 +21,6 @@ app.use((req, res, next) => {
 
 // Middleware pour analyser les corps de requête JSON
 app.use(express.json()); // Remplace bodyParser.json()
-app.use(bodyParser.urlencoded({ extended: true })); // Si vous avez besoin d'analyser les corps de requête URL-encoded
 
 // Middleware pour journaliser les requêtes
 app.use((req, res, next) => {

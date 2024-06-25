@@ -4,8 +4,6 @@ const fs = require('fs');
 
 // Fonction pour créer un livre
 exports.createBook = (req, res, next) => {
-  console.log('Request body:', req.body);
-  console.log('Request file:', req.file);
 
   try {
     const bookObject = JSON.parse(req.body.book);
@@ -41,7 +39,7 @@ exports.modifyBook = (req, res, next) => {
           if (book.userId != req.auth.userId) {
               res.status(401).json({ message : 'Non-autorisé'});
           } else {
-              Book.updateOne({ _id: req.params.id}, { ...bookObject, _id: req.params.id})
+            Book.updateOne({ _id: req.params.id }, bookObject)
               .then(() => res.status(200).json({message : 'Objet modifié!'}))
               .catch(error => res.status(401).json({ error }));
           }
@@ -105,9 +103,6 @@ exports.rateBook = (req, res) => {
   // Récupérer la note depuis le corps de la requête
   const { rating } = req.body; 
 
-  // Log pour vérifier les données de la requête
-  console.log('Requête reçue pour noter le livre:', bookId, 'avec la note:', rating);
-
   // Rechercher le livre par son ID dans la base de données
   Book.findById(bookId)
     .then(book => {
@@ -132,8 +127,6 @@ exports.rateBook = (req, res) => {
       // Sauvegarder les modifications dans la base de données
       book.save()
         .then(updatedBook => {
-          // Log pour vérifier les données renvoyées
-          console.log('Livre mis à jour:', updatedBook);
 
           // Renvoie le livre mis à jour
           res.status(201).json(updatedBook);
