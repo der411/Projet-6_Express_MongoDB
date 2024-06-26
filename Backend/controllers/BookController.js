@@ -122,7 +122,11 @@ exports.rateBook = (req, res) => {
       book.ratings.push({ userId: req.auth.userId, grade: rating });
 
       // Calculer la nouvelle note moyenne du livre
-      book.averageRating = book.ratings.reduce((acc, r) => acc + r.grade, 0) / book.ratings.length;
+      let total = book.ratings.reduce((acc, r) => acc + r.grade, 0);
+      let averageRating = total / book.ratings.length;
+
+      // Arrondir la moyenne au dixième
+      book.averageRating = parseFloat(averageRating.toFixed(1));
 
       // Sauvegarder les modifications dans la base de données
       book.save()

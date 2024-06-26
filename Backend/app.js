@@ -1,7 +1,8 @@
+require('dotenv').config();
+
 // Importation des modules nécessaires
 const express = require('express');
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
 const path = require('path');
 
 // Importation des routes
@@ -29,7 +30,7 @@ app.use((req, res, next) => {
 });
 
 // Connexion à la base de données MongoDB
-mongoose.connect('mongodb+srv://der411:MjuDNzlo9AURYIp0@der411.inimlm0.mongodb.net/?retryWrites=true&w=majority&appName=der411')
+mongoose.connect( process.env.MONGODB_URI)
   .then(() => console.log('Connexion à MongoDB réussie !'))
   .catch(() => console.log('Connexion à MongoDB échouée !'));
 

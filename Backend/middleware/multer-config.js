@@ -1,8 +1,8 @@
-// Importation des modules nécessaires pour le traitement des fichiers et des images
 const multer = require('multer');
 const sharp = require('sharp');
 const path = require('path');
 const fs = require('fs').promises;
+const { rimraf } = require('rimraf'); // Importation de rimraf
 
 // Définition des types MIME pour correspondre les types de fichiers entrants avec leurs extensions
 const MIME_TYPES = {
@@ -29,42 +29,81 @@ const storage = multer.diskStorage({
 // Middleware de multer pour gérer le téléchargement d'un seul fichier image
 const upload = multer({ storage }).single('image');
 
+// Fonction pour tenter de renommer un fichier avec des réessais
+const tryToRenameFile = async (oldPath, newPath, attempts = 3, delay = 1000) => {
+    for (let i = 0; i < attempts; i++) {
+        try {
+            await fs.rename(oldPath, newPath);
+            console.log(`Image originale déplacée vers: ${newPath}`);
+            return;
+        } catch (err) {
+            console.error(`Erreur lors du renommage de l'image originale (tentative ${i + 1}):`, err);
+            if (i < attempts - 1) {
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+        }
+    }
+    throw new Error(`Impossible de renommer l'image originale après ${attempts} tentatives: ${oldPath}`);
+};
+
+// Fonction pour tenter de supprimer un fichier avec des réessais
+const tryToDeleteFile = async (filePath, attempts = 3, delay = 1000) => {
+    for (let i = 0; i < attempts; i++) {
+        try {
+            await rimraf.moveRemove(filePath);
+            console.log(`Image originale supprimée: ${filePath}`);
+            return;
+        } catch (err) {
+            console.error(`Erreur lors de la suppression de l'image originale (tentative ${i + 1}):`, err);
+            if (i < attempts - 1) {
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+        }
+    }
+    throw new Error(`Impossible de supprimer l'image originale après ${attempts} tentatives: ${filePath}`);
+};
+
 // Middleware pour optimiser l'image téléchargée avec sharp
 const optimizeImage = async (req, res, next) => {
     if (!req.file) {
-        // Si aucun fichier n'est téléchargé, passe au middleware suivant
         return next();
     }
 
-    // Chemin complet du fichier image original
     const { filename } = req.file;
     const filePath = path.join('images', filename);
-
-    // Préparation du chemin du fichier WebP optimisé
-    const filenameWithoutExtension = path.basename(filename, path.extname(filename));
-    const webpFilePath = path.join('images', `${filenameWithoutExtension}-${Date.now()}.webp`);
+    const extension = path.extname(filename).toLowerCase();
+    const filenameWithoutExtension = path.basename(filename, extension);
+    const newFilename = `${filenameWithoutExtension}-${Date.now()}${extension}`;
+    const newFilePath = path.join('images', newFilename);
 
     try {
-        // Assurer que le fichier original est accessible
         await fs.access(filePath);
+        console.log(`Accès au fichier original: ${filePath}`);
 
-        // Redimensionner l'image et la convertir en format WebP avec sharp
-        const data = await sharp(filePath)
-            .resize(300, 300, { fit: 'inside' })  // Redimensionne l'image pour s'adapter à une boîte de 300x300 pixels
-            .webp()  // Convertit en WebP
-            .toBuffer(); // Récupère les données binaires de l'image
-        
-        // Écrire le nouveau fichier WebP sur le disque
-        await fs.writeFile(webpFilePath, data);
+        // Si le fichier est déjà au format WebP, on passe directement sans redimensionner
+        if (extension === '.webp') {
+            console.log('Le fichier est déjà au format WebP et ne nécessite pas de modification.');
+            req.file.filename = filename; // Utiliser le nom de fichier original sans modification
+            return next();
+        } else {
+            console.log('Début de l\'optimisation de l\'image');
+            // Conversion et redimensionnement pour les autres formats
+            const webpFilePath = newFilePath.replace(extension, '.webp');
+            await sharp(filePath)
+                .resize(300, 300, { fit: 'inside' })
+                .webp()
+                .toFile(webpFilePath);
+            req.file.filename = path.basename(webpFilePath); // Mettre à jour le nom de fichier dans req.file
+        }
 
-        // Mettre à jour le chemin du fichier dans l'objet req.file pour refléter le nouveau fichier WebP
-        req.file.filename = path.basename(webpFilePath);
+        console.log(`Image traitée et sauvegardée sous: ${newFilePath}`);
+        await tryToRenameFile(filePath, path.join('images', `temp-${filename}`));
+        await tryToDeleteFile(path.join('images', `temp-${filename}`));
 
-        // Passer au middleware suivant
         next();
-
     } catch (error) {
-        res.status(500).json({ error:'Erreur lors du traitement de l/image' });
+        console.error('Erreur lors de l\'optimisation de l\'image:', error);
+        res.status(500).json({ error: 'Erreur lors du traitement de l\'image' });
     }
 };
 

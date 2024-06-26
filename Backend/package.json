@@ -1,21 +1,30 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Backend for Mon Vieux Grimoire application",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
-  "author": "",
+  "author": "Vincent Vaitilingom",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.4.3",
     "mongoose-unique-validator": "^5.0.0",
     "multer": "^1.4.5-lts.1",
-    "sharp": "^0.33.4"
+    "password-validator": "^5.3.0",
+    "rimraf": "^5.0.7",
+    "sharp": "^0.33.4",
+    "validator": "^13.12.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
   }
 }
