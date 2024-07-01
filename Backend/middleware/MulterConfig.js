@@ -18,7 +18,6 @@ const storage = multer.diskStorage({
         callback(null, 'images');
     },
     filename: (req, file, callback) => {
-        // Génération d'un nom de fichier unique : remplace les espaces par des underscores et ajoute le timestamp
         const name = file.originalname.split(' ').join('_');
         const extension = MIME_TYPES[file.mimetype];
         callback(null, name + Date.now() + '.' + extension);
@@ -33,7 +32,6 @@ const tryToDeleteFile = async (filePath, attempts = 3, delay = 1000) => {
     for (let i = 0; i < attempts; i++) {
         try {
             await rimraf.moveRemove(filePath);
-            console.log(`Image originale supprimée: ${filePath}`);
             return;
         } catch (err) {
             console.error(`Erreur lors de la suppression de l'image originale (tentative ${i + 1}):`, err);
@@ -58,22 +56,15 @@ const optimizeImage = async (req, res, next) => {
     const webpFilePath = path.join('images', `${filenameWithoutExtension}-${Date.now()}${extension === '.webp' ? '.webp' : '.webp'}`);
 
     try {
-        console.log(`Accès au fichier original: ${filePath}`);
-
-        console.log('Début de l\'optimisation de l\'image');
-        // Conversion et redimensionnement pour les autres formats et WebP
         await sharp(filePath)
-            .resize(200, 300, { fit: 'fill' })  // Redimensionne exactement à 200x300 pixels
+            .resize(200, 300, { fit: 'fill' })
             .webp()
             .toFile(webpFilePath);
-        console.log(`Image traitée et sauvegardée sous: ${webpFilePath}`);
         
-        // Suppression de l'image originale si ce n'est pas déjà un fichier WebP
         if (extension !== '.webp') {
             await tryToDeleteFile(filePath);
         }
 
-        // Mettre à jour le nom de fichier dans req.file pour refléter le nouveau fichier WebP
         req.file.filename = path.basename(webpFilePath);
 
         next();
@@ -83,6 +74,4 @@ const optimizeImage = async (req, res, next) => {
     }
 };
 
-
-// Exportation des middlewares pour utilisation dans d'autres fichiers
 module.exports = { upload, optimizeImage };

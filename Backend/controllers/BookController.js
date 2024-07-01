@@ -77,7 +77,7 @@ exports.getOneBook = (req, res, next) => {
         }
         res.status(200).json(book);
       })
-      .catch(error => res.status(500).json({ error: 'Erreur serveur' }));
+      .catch(error => res.status(500).json({ error: error.message }));
 };
 
 // Fonction pour récupérer tous les livres
@@ -113,6 +113,7 @@ exports.rateBook = (req, res) => {
 
       // Vérifier si l'utilisateur a déjà noté ce livre
       const existingRating = book.ratings.find(r => r.userId.equals(req.auth.userId));
+
       if (existingRating) {
         // Si une note existe déjà, renvoyer une erreur 400
         return res.status(400).json({ message: 'Vous avez déjà noté ce livre' });
@@ -131,14 +132,10 @@ exports.rateBook = (req, res) => {
       // Sauvegarder les modifications dans la base de données
       book.save()
         .then(updatedBook => {
-
-          // Renvoie le livre mis à jour
           res.status(201).json(updatedBook);
         })
-        // En cas d'erreur lors de la sauvegarde, renvoyer une erreur 500
         .catch(error => res.status(500).json({ error }));
     })
-    // En cas d'erreur lors de la recherche du livre, renvoyer une erreur 500
     .catch(error => res.status(500).json({ error }));
 };
 

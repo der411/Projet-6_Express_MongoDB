@@ -36,7 +36,7 @@ const userSchema = mongoose.Schema({
   }
 });
 
-userSchema.plugin(uniqueValidator); // Plugin pour vérifier l'unicité de l'email
+userSchema.plugin(uniqueValidator); // Vérifier l'unicité de l'email
 
 module.exports = {
   User: mongoose.model('User', userSchema),
