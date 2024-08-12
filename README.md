@@ -9,8 +9,8 @@
 
 C'est une application web permettant aux utilisateurs de noter et de consulter des livres. Le projet implique le développement du back-end avec Node.js, Express, et une base de données MongoDB.
 # Aperçu 🎨
-[![Aperçu](https://live.staticflickr.com/65535/53900562245_abe6368787_n.jpg)](https://flic.kr/p/2q81thH)
 [![Aperçu](https://live.staticflickr.com/65535/53900562240_442ca3dfe4_n.jpg)](https://flic.kr/p/2q81thC)
+[![Aperçu](https://live.staticflickr.com/65535/53900562245_abe6368787_n.jpg)](https://flic.kr/p/2q81thH)
 
 # Installation
 1. Clonez le dépôt
@@ -20,14 +20,16 @@ C'est une application web permettant aux utilisateurs de noter et de consulter d
    ```npm install```
    
 3. Configurations 📊 Base de données et 🔒 JWT
+
    Créez un fichier .env à la racine du projet et ajoutez les variables d'environnement nécessaires, y compris la clé secrète JWT pour l'authentification sécurisée.
-   Exemple de contenu du fichier .env :
-   - ```MONGODB_URI=<votre_url_mongodb>```
-   - **Remplacez <votre_url_mongodb> par l'URL de votre base de données MongoDB.**
-   - ```JWT_SECRET=<votre_clé_secrète_jwt>``` 
-   - **Remplacez <votre_clé_secrète_jwt> par une chaîne de caractères sécurisée utilisée pour signer et vérifier les tokens JWT.**
    
-4. Démarrez l'application 🚀
+      Exemple de contenu du fichier .env :
+      - ```MONGODB_URI=<votre_url_mongodb>```
+      - **Remplacez <votre_url_mongodb> par l'URL de votre base de données MongoDB.**
+      - ```JWT_SECRET=<votre_clé_secrète_jwt>``` 
+      - **Remplacez <votre_clé_secrète_jwt> par une chaîne de caractères sécurisée utilisée pour signer et vérifier les tokens JWT.**
+   
+5. Démarrez l'application 🚀
    ```npm start```
    
 # Fonctionnalités
