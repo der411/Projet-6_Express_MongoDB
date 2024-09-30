@@ -14,12 +14,16 @@ C'est une application web permettant aux utilisateurs de noter et de consulter d
 
 # Installation
 1. Clonez le dépôt
-``` git clone git@github.com/Projet-6_Express_MongoDB.git```
+   ```sh
+   git clone git@github.com/Projet-6_Express_MongoDB.git
+   ```
 
-2. Installez les dépendances
-   ```npm install```
+3. Installez les dépendances
+   ```sh
+   npm install
+   ```
    
-3. Configurations 📊 Base de données et 🔒 JWT
+5. Configurations 📊 Base de données et 🔒 JWT
 
    Créez un fichier .env à la racine du projet et ajoutez les variables d'environnement nécessaires, y compris la clé secrète JWT pour l'authentification sécurisée.
    
@@ -29,8 +33,10 @@ C'est une application web permettant aux utilisateurs de noter et de consulter d
       - ```JWT_SECRET=<votre_clé_secrète_jwt>``` 
       - **Remplacez <votre_clé_secrète_jwt> par une chaîne de caractères sécurisée utilisée pour signer et vérifier les tokens JWT.**
    
-5. Démarrez l'application 🚀
-   ```npm start```
+6. Démarrez l'application 🚀
+   ```sh
+   npm start
+   ```
    
 # Fonctionnalités
  - **CRUD pour les livres et notations :**
